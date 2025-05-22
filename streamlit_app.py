@@ -4,7 +4,6 @@ import os
 from pydantic import BaseModel
 
 from autogen import ConversableAgent, UserProxyAgent, LLMConfig
-
 from autogen.tools.experimental.web_search_preview import WebSearchPreviewTool
 
 from dotenv import load_dotenv
@@ -31,34 +30,18 @@ search_tool = WebSearchPreviewTool(
 )
 #search_tool.register_for_llm(user_proxy)
 
-def streamlit_summary_writer(summary_text: str) -> None:
-    """
-    A tool function that writes a summary directly to the Streamlit UI.
-    The agent will call this function when needed.
-    """
-    print("[DEBUG] streamlit_summary_writer tool was called.")
-    st.title("Sažetak: EU fondovi i umjetna inteligencija")
-    st.write('### Summary')
-    st.write(summary_text)
-
+   
 instructions = """
 Search for information using the web and create a summary of your findings. 
-Once you find relevant results, use the following function to display them in a Streamlit UI:
-
-**Function:**
-
-`streamlit_summary_writer(summary_text: str)`
-
-Only call this function when you are ready to output the final summary. Do not return the result directly — always use this function.
+Once you find relevant results create a summary. 
 """
 
 search_agent = ConversableAgent(
     name="SearchAssistant",
     system_message=instructions,
     llm_config=llm_config,
-    functions=[streamlit_summary_writer]
+    #functions=[streamlit_summary_writer]
 )
-search_agent.register_for_execution(name="streamlit_summary_writer")(streamlit_summary_writer)
 search_tool.register_for_llm(search_agent)
 
 print("Available tools for agent:")
@@ -84,3 +67,5 @@ if st.button("Run Query") and user_query:
         max_turns=3,
     )
     response.process()
+    st.markdown(response.summary)
+    
