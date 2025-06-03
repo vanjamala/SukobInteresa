@@ -14,6 +14,11 @@ from io import BytesIO
 
 
 load_dotenv()
+
+if not os.getenv("OPENAI_API_KEY"):
+    st.error("Missing OpenAI API key. Please add it to your .env file.")
+    st.stop()
+    
 llm_config = LLMConfig(
     config_list=[
         {

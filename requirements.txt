@@ -5,3 +5,4 @@ pyautogen
 requests
 pandas
 openpyxl
+python-dotenv
