@@ -13,7 +13,15 @@ import pandas as pd
 from io import BytesIO
 
 
-load_dotenv()
+# This gets the absolute path to your script directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# This constructs the full path to your .env file in that directory
+env_path = os.path.join(BASE_DIR, ".env")
+
+print(f"Attempting to load .env from: {env_path}")
+load_dotenv(env_path)
+
 
 # DEBUG: show the path of the current working directory
 st.write("CWD:", os.getcwd())
