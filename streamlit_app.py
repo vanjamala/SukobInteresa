@@ -18,8 +18,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # This constructs the full path to your .env file in that directory
 env_path = os.path.join(BASE_DIR, ".env")
+st.write(env_path)
 
-print(f"Attempting to load .env from: {env_path}")
+st.write(f"Attempting to load .env from: {env_path}")
 load_dotenv(env_path)
 
 
