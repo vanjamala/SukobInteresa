@@ -15,7 +15,7 @@ from io import BytesIO
 load_dotenv()
 
 # Check if OPENAI_API_KEY is set
-api_key = st.secrets("OPENAI_API_KEY")
+api_key = st.secrets["OPENAI_API_KEY"]
 if not api_key:
     st.error("OPENAI_API_KEY not found in environment.")
 else:
