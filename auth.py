@@ -4,7 +4,7 @@ import streamlit as st
 
 def authenticate():
     st.write("auth")
-    users = st.secrets["USERS"]
+    users = st.secrets["users"]
 
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
