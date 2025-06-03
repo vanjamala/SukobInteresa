@@ -15,9 +15,18 @@ from io import BytesIO
 
 load_dotenv()
 
-if not os.getenv("OPENAI_API_KEY"):
-    st.error("Missing OpenAI API key. Please add it to your .env file.")
-    st.stop()
+# DEBUG: show the path of the current working directory
+st.write("CWD:", os.getcwd())
+
+# DEBUG: list files in the directory
+st.write("Files in CWD:", os.listdir())
+
+# Check if OPENAI_API_KEY is set
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    st.error("OPENAI_API_KEY not found in environment.")
+else:
+    st.success("API key loaded successfully!")
     
 llm_config = LLMConfig(
     config_list=[
