@@ -3,6 +3,7 @@
 import streamlit as st
 
 def authenticate():
+    st.write("auth")
     users = st.secrets["USERS"]
 
     if "authenticated" not in st.session_state:
