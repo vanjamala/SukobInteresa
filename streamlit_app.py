@@ -12,35 +12,10 @@ from dotenv import load_dotenv
 import pandas as pd
 from io import BytesIO
 
-
-# This gets the absolute path to your script directory
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# This constructs the full path to your .env file in that directory
-env_path = os.path.join(BASE_DIR, ".env")
-st.write(env_path)
-
-st.write(f"Attempting to load .env from: {env_path}")
-load_dotenv(env_path)
-
-
-# DEBUG: show the path of the current working directory
-st.write("CWD:", os.getcwd())
-
-# DEBUG: list files in the directory
-st.write("Files in CWD:", os.listdir())
-
-
-import os
-st.write("CWD:", os.getcwd())
-st.write("Script __file__:", __file__)
-st.write("Is .env in cwd?", os.path.exists(".env"))
-st.write("Is .env near script?", os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")))
-
-
+load_dotenv()
 
 # Check if OPENAI_API_KEY is set
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = st.secrets("OPENAI_API_KEY")
 if not api_key:
     st.error("OPENAI_API_KEY not found in environment.")
 else:
