@@ -11,8 +11,19 @@ from autogen.tools.experimental.web_search_preview import WebSearchPreviewTool
 from dotenv import load_dotenv
 import pandas as pd
 from io import BytesIO
+from auth import authenticate, logout_button
 
-load_dotenv()
+# Call login function
+authenticate()
+
+# Once authenticated, show logout and app
+logout_button()
+
+st.sidebar.success(f"Logged in as: {st.session_state['username']}")
+
+# Your protected app logic here
+st.write("🎉 You are inside the app!")
+
 
 # Check if OPENAI_API_KEY is set
 api_key = st.secrets["OPENAI_API_KEY"]
