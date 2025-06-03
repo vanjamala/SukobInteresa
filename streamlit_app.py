@@ -20,9 +20,16 @@ st.write("CWD:", os.getcwd())
 
 # DEBUG: list files in the directory
 st.write("Files in CWD:", os.listdir())
-# Get the absolute path to the current script's directory
-base_dir = os.path.dirname(os.path.abspath(__file__))
-dotenv_path = os.path.join(base_dir, ".env")
+
+
+import os
+
+print("CWD:", os.getcwd())
+print("Script __file__:", __file__)
+print("Is .env in cwd?", os.path.exists(".env"))
+print("Is .env near script?", os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")))
+
+
 # Check if OPENAI_API_KEY is set
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
