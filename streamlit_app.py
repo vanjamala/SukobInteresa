@@ -23,11 +23,11 @@ st.write("Files in CWD:", os.listdir())
 
 
 import os
+st.write("CWD:", os.getcwd())
+st.write("Script __file__:", __file__)
+st.write("Is .env in cwd?", os.path.exists(".env"))
+st.write("Is .env near script?", os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")))
 
-print("CWD:", os.getcwd())
-print("Script __file__:", __file__)
-print("Is .env in cwd?", os.path.exists(".env"))
-print("Is .env near script?", os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")))
 
 
 # Check if OPENAI_API_KEY is set
