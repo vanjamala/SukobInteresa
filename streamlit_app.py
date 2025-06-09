@@ -76,26 +76,9 @@ if st.session_state["authenticated"]:
         functions=[register_connection_entry]
     )
     search_tool.register_for_llm(search_agent)
-
+    print(f"Tools registered in agent: {search_agent.tools}")
     # File uploader
     uploaded_file = st.file_uploader("Upload your Excel file", type=["csv", "xlsx"])
-
-    # Button to run the query
-    #if st.button("Run Query") and user_query:
-    #    # Combine user query with hidden instructions
-    #    full_query = f"{user_query}\n{instructions}"
-
-    #    # Run the agent with the full query
-    #    response = search_agent.run(
-    #        #recipient = search_agent,
-    #        message=full_query,
-    #        tools=search_agent.tools, 
-    #        user_input=False,
-    #        max_turns=3,
-    #    )
-    #    response.process()
-    #    st.markdown(response.summary)
-
     if uploaded_file:
         # Read the file into a DataFrame
         if uploaded_file.name.endswith('.csv'):
@@ -107,5 +90,48 @@ if st.session_state["authenticated"]:
         st.write("Uploaded Data:")
         st.dataframe(df)
         
+        #Initialize an empty list to hold all results
+        json_data_sukob = []
+
+        eu_project_beneficiary = df[df["EU project beneficiary"] == "DA"].reset_index(drop=True)
+        associated_party = df[df["Associated party"] == "DA"].reset_index(drop=True)
+        chunk_size = 5
+        associated_party_chunks = [associated_party.iloc[i:i+chunk_size, :] for i in range(0, associated_party.shape[0], chunk_size)]
+        print(f"Total chunks created: {len(associated_party_chunks)}")
+        for i, chunk in enumerate(associated_party_chunks):
+            print(f"Chunk {i+1}:\n{chunk}")
+        global total_cost
+        total_cost = 0
+        global total_tokens
+        total_tokens = 0
+        global cost_descriptions
+        cost_descriptions = []
+        for (eu_project_beneficiary_name, eu_project_beneficiary_institution) in eu_project_beneficiary.loc[:, ["Name", "Institution"]].itertuples(index=False):
+            for chunk in associated_party_chunks:
+                task = f"Search online for websites mentioning EU project beneficiary '{eu_project_beneficiary_name}' from '{eu_project_beneficiary_institution}' and the following list of associated parties:"
+                for (associated_party_name, associated_party_institution) in chunk.loc[:, ["Name", "Institution"]].itertuples(index=False):
+                    task += f"\n - '{associated_party_name}' from '{associated_party_institution}'"
+                task += "\n\nDo not visit Dun & Bradstreet. Each search should have only the names, not the institution. +\
+                Only look for websites that mention both a person in group EU project beneficiary and a person in group Associated Party. +\
+                You MUST visit and process the first 5 links from every search.+\
+                Summarize the findings for each viewport that finds names of both individuals by calling the 'register_connection_entry' function.+\
+                Even if you DO NOT find any viewports that mention both names, register your finding of no articles mentioning both by calling the 'register_connection_entry' function.+\
+                Findings should include both names and description of the connection between two individuals+\
+                Findings should include a TRUE for potential_connection_found if any type of connection is found, however small and FALSE otherwise.+\
+                Findings should include a separate TRUE for both_names_found if both names are mentioned in the same viewport in any context. FALSE otherwise.+\
+                Findings for connection and both_names_found do not have to be the same. For instance, if both are employees at the same institution connection_found is TRUE +\
+                However if both names were not found on at least one same web page both_names_found is FALSE."        
+                
+        st.write(task)        
+        # Run the agent with the full query
+        response = search_agent.run(
+            recipient = search_agent,
+            message=task,
+            tools=search_agent.tools, 
+            user_input=False,
+            max_turns=3,
+        )
+        response.process()
+        st.markdown(response.summary)
 else:
     st.stop()  # Optional, defensive
