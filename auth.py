@@ -30,4 +30,4 @@ def authenticate():
 def logout_button():
     if st.sidebar.button("Logout"):
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
