@@ -33,13 +33,13 @@ if st.session_state["authenticated"]:
         config_list=[
             {
                 "model": "gpt-4.1",
-                "api_key": os.getenv("OPENAI_API_KEY")  # Pulls the API key from the environment
+                "api_key": api_key  # Pulls the API key from the environment
             }
         ]
     )
     search_tool = WebSearchPreviewTool(
         llm_config=llm_config,
-        instructions="""Summarize web pages found and print the summary on streamlit app using the registered function streamlit_summary_writer """,
+        instructions="""Summarize web pages found""",
     )
 
    
@@ -72,8 +72,7 @@ if st.session_state["authenticated"]:
     search_agent = ConversableAgent(
         name="SearchAssistant",
         system_message=instructions,
-        llm_config=llm_config,
-        functions=[register_connection_entry]
+        llm_config=llm_config
     )
     search_tool.register_for_llm(search_agent)
     print(f"Tools registered in agent: {search_agent.tools}")
@@ -94,6 +93,7 @@ if st.session_state["authenticated"]:
         json_data_sukob = []
 
         eu_project_beneficiary = df[df["EU project beneficiary"] == "DA"].reset_index(drop=True)
+        st.write(eu_project_beneficiary)
         associated_party = df[df["Associated party"] == "DA"].reset_index(drop=True)
         chunk_size = 5
         associated_party_chunks = [associated_party.iloc[i:i+chunk_size, :] for i in range(0, associated_party.shape[0], chunk_size)]
@@ -114,24 +114,23 @@ if st.session_state["authenticated"]:
                 task += "\n\nDo not visit Dun & Bradstreet. Each search should have only the names, not the institution. +\
                 Only look for websites that mention both a person in group EU project beneficiary and a person in group Associated Party. +\
                 You MUST visit and process the first 5 links from every search.+\
-                Summarize the findings for each viewport that finds names of both individuals by calling the 'register_connection_entry' function.+\
-                Even if you DO NOT find any viewports that mention both names, register your finding of no articles mentioning both by calling the 'register_connection_entry' function.+\
+                Summarize the findings for each that finds names of both individuals by calling the 'register_connection_entry' function.+\
+                Even if you DO NOT find any websites that mention both names, register your finding of no articles mentioning both by calling the 'register_connection_entry' function.+\
                 Findings should include both names and description of the connection between two individuals+\
                 Findings should include a TRUE for potential_connection_found if any type of connection is found, however small and FALSE otherwise.+\
-                Findings should include a separate TRUE for both_names_found if both names are mentioned in the same viewport in any context. FALSE otherwise.+\
+                Findings should include a separate TRUE for both_names_found if both names are mentioned in any context. FALSE otherwise.+\
                 Findings for connection and both_names_found do not have to be the same. For instance, if both are employees at the same institution connection_found is TRUE +\
                 However if both names were not found on at least one same web page both_names_found is FALSE."        
-                
-        st.write(task)        
-        # Run the agent with the full query
-        response = search_agent.run(
-            recipient = search_agent,
-            message=task,
-            tools=search_agent.tools, 
-            user_input=False,
-            max_turns=3,
-        )
-        response.process()
-        st.markdown(response.summary)
+                st.write(task)        
+                # Run the agent with the full query
+                response = search_agent.run(
+                    #recipient = search_agent,
+                    message=task,
+                    tools=search_agent.tools, 
+                    user_input=False,
+                    max_turns=3,
+                )
+                response.process()
+                st.markdown(response.summary)
 else:
     st.stop()  # Optional, defensive
