@@ -72,7 +72,8 @@ if st.session_state["authenticated"]:
     search_agent = ConversableAgent(
         name="SearchAssistant",
         system_message=instructions,
-        llm_config=llm_config
+        llm_config=llm_config,
+        functions=[register_connection_entry]
     )
     search_tool.register_for_llm(search_agent)
     print(f"Tools registered in agent: {search_agent.tools}")
@@ -111,10 +112,9 @@ if st.session_state["authenticated"]:
                 task = f"Search online for websites mentioning EU project beneficiary '{eu_project_beneficiary_name}' from '{eu_project_beneficiary_institution}' and the following list of associated parties:"
                 for (associated_party_name, associated_party_institution) in chunk.loc[:, ["Name", "Institution"]].itertuples(index=False):
                     task += f"\n - '{associated_party_name}' from '{associated_party_institution}'"
-                task += "\n\nDo not visit Dun & Bradstreet. Each search should have only the names, not the institution. +\
+                task += "\n\n Each search should have only the names, not the institution. +\
                 Only look for websites that mention both a person in group EU project beneficiary and a person in group Associated Party. +\
-                You MUST visit and process the first 5 links from every search.+\
-                Summarize the findings for each that finds names of both individuals by calling the 'register_connection_entry' function.+\
+                Summarize the findings by calling the 'register_connection_entry' function.+\
                 Even if you DO NOT find any websites that mention both names, register your finding of no articles mentioning both by calling the 'register_connection_entry' function.+\
                 Findings should include both names and description of the connection between two individuals+\
                 Findings should include a TRUE for potential_connection_found if any type of connection is found, however small and FALSE otherwise.+\
@@ -132,5 +132,7 @@ if st.session_state["authenticated"]:
                 )
                 response.process()
                 st.markdown(response.summary)
+        summary_df = pd.DataFrame.from_records([x.model_dump() for x in potential_connection_found])
+        st.write(summary_df)
 else:
     st.stop()  # Optional, defensive
