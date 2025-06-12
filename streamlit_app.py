@@ -79,7 +79,7 @@ if st.session_state["authenticated"]:
     print(f"Tools registered in agent: {search_agent.tools}")
     # File uploader
     uploaded_file = st.file_uploader("Upload your Excel file", type=["csv", "xlsx"])
-    if uploaded_file:
+    if uploaded_file and "summary_df" not in st.session_state:
         # Read the file into a DataFrame
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
@@ -134,5 +134,19 @@ if st.session_state["authenticated"]:
                 st.markdown(response.summary)
         summary_df = pd.DataFrame.from_records([x.model_dump() for x in potential_connection_found])
         st.write(summary_df)
+        st.session_state.summary_df = summary_df
+        output = BytesIO()
+        if "summary_df" in st.session_state:
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                summary_df.to_excel(writer, index=False, sheet_name='Results')
+            output.seek(0)
+
+            # Streamlit download button
+            st.download_button(
+                label="📥 Download Results as Excel",
+                data=output,
+                file_name="search_results_summary.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 else:
     st.stop()  # Optional, defensive
