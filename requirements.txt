@@ -1,5 +1,6 @@
 streamlit
-ag2[openai]==0.9.1.post0
+ag2[openai]>==0.2.0
+openai==1.66.2
 pydantic
 pyautogen
 requests
