@@ -44,8 +44,17 @@ if st.session_state["authenticated"]:
 
    
     instructions = """
-    Search for information using the web and create a summary of your findings. 
-    Once you find relevant results create a summary. 
+    For each webpage you visit:
+    1. Look for all associated parties from the current chunk.
+    2. For every associated party found, create a separate entry:
+    - eu_project_beneficiary
+    - associated_party
+    - findings (text describing connection or 'No connection found')
+    - potential_connection_found (True if a meaningful connection exists)
+    - both_names_found (True if both names appear on this page)
+    - links (the URL of the page)
+   3. Do NOT skip any associated party even if multiple names appear on the same page.
+   4. If no associated parties are found, create entries marking 'No connection found'. 
     """
 
     class ConnectionEntry(BaseModel):
@@ -96,7 +105,7 @@ if st.session_state["authenticated"]:
         eu_project_beneficiary = df[df["EU project beneficiary"] == "DA"].reset_index(drop=True)
         st.write(eu_project_beneficiary)
         associated_party = df[df["Associated party"] == "DA"].reset_index(drop=True)
-        chunk_size = 5
+        chunk_size = 1
         associated_party_chunks = [associated_party.iloc[i:i+chunk_size, :] for i in range(0, associated_party.shape[0], chunk_size)]
         print(f"Total chunks created: {len(associated_party_chunks)}")
         for i, chunk in enumerate(associated_party_chunks):
@@ -113,11 +122,12 @@ if st.session_state["authenticated"]:
                 for (associated_party_name, associated_party_institution) in chunk.loc[:, ["Name", "Institution"]].itertuples(index=False):
                     task += f"\n - '{associated_party_name}' from '{associated_party_institution}'"
                 task += "\n\n Each search should have only the names, not the institution. +\
-                Only look for websites that mention both a person in group EU project beneficiary and a person in group Associated Party. +\
-                Summarize the findings by calling the 'register_connection_entry' function.+\
+                Look for websites that mention both a person in group EU project beneficiary and a person in group Associated Party. +\
+                For each query, visit all URLs returned in the top 10 search results. Do not skip any pages, even if the snippet looks irrelevant. +\
+                Summarize connections for all pairs on each page. Summarize the findings by calling the 'register_connection_entry' function.+\
                 Even if you DO NOT find any websites that mention both names, register your finding of no articles mentioning both by calling the 'register_connection_entry' function.+\
                 Findings should include both names and description of the connection between two individuals+\
-                Findings should include a TRUE for potential_connection_found if any type of connection is found, however small and FALSE otherwise.+\
+                Findings should include a TRUE for potential_connection_found if any type of connection is found even if persons are not mentioned in the same article, however small and FALSE otherwise.+\
                 Findings should include a separate TRUE for both_names_found if both names are mentioned in any context. FALSE otherwise.+\
                 Findings for connection and both_names_found do not have to be the same. For instance, if both are employees at the same institution connection_found is TRUE +\
                 However if both names were not found on at least one same web page both_names_found is FALSE."        
