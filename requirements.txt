@@ -2,7 +2,7 @@ streamlit
 ag2[openai]>==0.2.0
 openai==1.66.2
 pydantic
-pyautogen
+ag2
 requests
 pandas
 openpyxl
